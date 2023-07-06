@@ -1,6 +1,6 @@
 <?php
 
-namespace SymfonyToolboxBundle\SymfonyToolboxBundle\Logger\Processor;
+namespace SymfonyToolboxBundle\Logger\Processor;
 
 use Monolog\Processor\ProcessorInterface;
 use Monolog\ResettableInterface;
