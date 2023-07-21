@@ -3,12 +3,11 @@
 namespace SciloneToolboxBundle\PubSub;
 
 use Exception;
-use Exception\InvalidAckDeadlineTime;
-use Exception\UnknownSubscriptionException;
 use Google\Cloud\PubSub\Message;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use SciloneToolboxBundle\PubSub\Exception\LoopException;
 use SciloneToolboxBundle\Symfony\Command\AbstractCommand;
@@ -35,9 +34,9 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
     protected int $workerTimeout = 10;
 
     public function __construct(
-        protected readonly LoggerInterface $logger,
         protected readonly SubscriptionFacade $subscriptionFacade,
-        protected readonly string $subscriptionName
+        protected readonly string $subscriptionName,
+        LoggerInterface $logger
     ) {
         parent::__construct($logger);
     }
