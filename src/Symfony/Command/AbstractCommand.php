@@ -87,7 +87,7 @@ abstract class AbstractCommand extends Command
         return $exitCode;
     }
 
-    private function convertSecondsToHumanReadableTime(float $time): string
+    protected function convertSecondsToHumanReadableTime(float $time): string
     {
         if ($time < 1) {
             return sprintf("%.2f secondes", $time);
@@ -115,7 +115,7 @@ abstract class AbstractCommand extends Command
         return $timeFormat;
     }
 
-    private function convertToHumanReadableSize(int $size): string
+    protected function convertToHumanReadableSize(int $size): string
     {
         if ($size < 0) {
             return 'Invalid Size';
@@ -127,7 +127,7 @@ abstract class AbstractCommand extends Command
         return round($size / (1024 ** $power), 2) . ' ' . $units[$power];
     }
 
-    private function getMemoryLimit(): int
+    protected function getMemoryLimit(): int
     {
         $units = array('K' => 1, 'M' => 2, 'G' => 3);
         $memoryLimit = ini_get('memory_limit');
