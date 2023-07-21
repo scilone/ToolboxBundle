@@ -1,6 +1,6 @@
 <?php
 
-namespace SymfonyToolboxBundle;
+namespace SciloneToolboxBundle;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;

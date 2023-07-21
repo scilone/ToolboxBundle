@@ -1,5 +1,5 @@
 {
-    "name": "scilone/symfonytoolboxbundle",
+    "name": "scilone/toolboxbundle",
     "type": "symfony-bundle",
     "license": "MIT",
     "minimum-stability": "stable",
@@ -8,14 +8,14 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "google/cloud-pubsub": "^1.45",
         "symfony/console": "5.4.*",
         "symfony/dotenv": "5.4.*",
         "symfony/flex": "^1.17|^2",
         "symfony/framework-bundle": "5.4.*",
         "symfony/runtime": "5.4.*",
-        "symfony/yaml": "5.4.*"
-    },
-    "require-dev": {
+        "symfony/yaml": "5.4.*",
+        "ext-pcntl": "*"
     },
     "config": {
         "allow-plugins": {
@@ -32,12 +32,12 @@
     },
     "autoload": {
         "psr-4": {
-            "SymfonyToolboxBundle\\": "src/"
+            "SciloneToolboxBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SymfonyToolboxBundle\\Tests\\": "tests/"
+            "SciloneToolboxBundle\\Tests\\": "tests/"
         }
     },
     "replace": {
