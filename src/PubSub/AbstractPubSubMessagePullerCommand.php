@@ -147,7 +147,14 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
 
     protected function onStart(): void
     {
-        //do something
+        $this->logger->info(
+            'Start script : {command}',
+            [
+                'command'   => $this->getName(),
+                'arguments' => $this->input->getArguments(),
+                'options'   => $this->input->getOptions(),
+            ]
+        );
     }
 
     protected function onEnd(): void
