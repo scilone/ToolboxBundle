@@ -150,6 +150,26 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         //do something
     }
 
+    protected function onEnd(): void
+    {
+        $this->logger->info(
+            'Puller ended ended with peak memory usage to ' .
+            $this->convertToHumanReadableSize(memory_get_peak_usage(true)),
+            ['command' => $this->getName()]
+        );
+
+        $percentMemoryUsed = round(memory_get_peak_usage(true)*100/$this->getMemoryLimit());
+        if ($percentMemoryUsed > static::MEMORY_USAGE_WARNING) {
+            $this->logger->warning(
+                'Script {command} use more than ' . static::MEMORY_USAGE_WARNING . '% of memory allowed',
+                [
+                    'command'             => $this->getName(),
+                    'percent_memory_used' => $percentMemoryUsed,
+                ]
+            );
+        }
+    }
+
     protected function onStartLoop(): void
     {
         //do something

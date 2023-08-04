@@ -57,16 +57,15 @@ abstract class AbstractCommand extends Command
         $durationScript = time() - $this->start;
 
         $this->logger->info(
-            'Script ended in ' . $this->convertSecondsToHumanReadableTime($durationScript) .
-            ' with peak memory usage to ' . $this->convertToHumanReadableSize(memory_get_peak_usage(true)) .
-            ' : {command}',
+            'Script {command} ended in ' . $this->convertSecondsToHumanReadableTime($durationScript) .
+            ' with peak memory usage to ' . $this->convertToHumanReadableSize(memory_get_peak_usage(true)),
             ['command' => $this->getName()]
         );
 
         $percentMemoryUsed = round(memory_get_peak_usage(true)*100/$this->getMemoryLimit());
         if ($percentMemoryUsed > static::MEMORY_USAGE_WARNING) {
             $this->logger->warning(
-                'Script {command} use more than 70% of memory allowed {percent_memory_used}%',
+                'Script use more than ' . static::MEMORY_USAGE_WARNING . '% of memory allowed',
                 [
                     'command'             => $this->getName(),
                     'percent_memory_used' => $percentMemoryUsed,
@@ -76,7 +75,7 @@ abstract class AbstractCommand extends Command
 
         if ($exitCode !== self::SUCCESS) {
             $this->logger->error(
-                'Script exit with an error code({exit_code}) : {command}',
+                'Script exit with an error code',
                 [
                     'command'   => $this->getName(),
                     'exit_code' => $exitCode,
