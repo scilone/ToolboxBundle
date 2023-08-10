@@ -67,3 +67,8 @@
 /.idea/php.xml
 /.idea/SciloneToolboxBundle.iml
 /.idea/vcs.xml
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
