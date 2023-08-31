@@ -72,7 +72,6 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
 
     /**
      * @throws \SciloneToolboxBundle\PubSub\Exception\InvalidAckDeadlineTime
-     * @throws \SciloneToolboxBundle\PubSub\Exception\UnknownSubscriptionException
      * @throws LoopException
      */
     protected function doExecute(): int {
@@ -112,7 +111,6 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
 
     /**
      * @throws \SciloneToolboxBundle\PubSub\Exception\InvalidAckDeadlineTime
-     * @throws \SciloneToolboxBundle\PubSub\Exception\UnknownSubscriptionException
      * @throws LoopException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int

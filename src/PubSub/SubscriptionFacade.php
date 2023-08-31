@@ -7,7 +7,6 @@ use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Subscription;
 use SciloneToolboxBundle\PubSub\Exception\InvalidAckDeadlineTime;
-use SciloneToolboxBundle\PubSub\Exception\UnknownSubscriptionException;
 
 class SubscriptionFacade
 {
@@ -20,9 +19,6 @@ class SubscriptionFacade
     {
     }
 
-    /**
-     * @throws UnknownSubscriptionException
-     */
     public function getSubscription(string $name): Subscription
     {
         if (
@@ -30,20 +26,12 @@ class SubscriptionFacade
            || $this->subscriptions[$name] instanceof Subscription === false
         ) {
             $subscription = $this->pubSub->subscription($name);
-
-            if ($subscription->exists() !== true) {
-                throw new UnknownSubscriptionException();
-            }
-
             $this->subscriptions[$name] = $subscription;
         }
 
         return $this->subscriptions[$name];
     }
 
-    /**
-     * @throws UnknownSubscriptionException
-     */
     public function pull(string $subscriptionName, array $options = []): ?Message
     {
         $messages = $this->getSubscription($subscriptionName)->pull(
@@ -55,24 +43,17 @@ class SubscriptionFacade
         return $messages !== [] ? current($messages) : null;
     }
 
-    /**
-     * @throws UnknownSubscriptionException
-     */
     public function pullBatch(string $subscriptionName, array $options = []): array
     {
         return $this->getSubscription($subscriptionName)->pull($options + $this->pullOptions);
     }
 
-    /**
-     * @throws UnknownSubscriptionException
-     */
     public function acknowledge(string $subscriptionName, Message $message, $options = []): void
     {
         $this->getSubscription($subscriptionName)->acknowledge($message, $options);
     }
 
     /**
-     * @throws UnknownSubscriptionException
      * @throws BadRequestException
      */
     public function acknowledgeBatch(string $subscriptionName, array $messages, $options = []): void
@@ -81,7 +62,6 @@ class SubscriptionFacade
     }
 
     /**
-     * @throws UnknownSubscriptionException
      * @throws InvalidAckDeadlineTime
      */
     public function modifyAckDeadline(string $subscriptionName, Message $message, int $seconds, array $options = []): void
