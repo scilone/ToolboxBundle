@@ -12,6 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use SciloneToolboxBundle\PubSub\Exception\LoopException;
 use SciloneToolboxBundle\Symfony\Command\AbstractCommand;
 
+use Symfony\Component\Process\Process;
 use const SIGINT;
 use const SIGQUIT;
 use const SIGTERM;
@@ -84,14 +85,23 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
             return self::SUCCESS;
         }
 
-        $this->subscriptionFacade->modifyAckDeadline(
-            $this->subscriptionName,
-            $message,
-            static::ACK_DEADLINE
-        );
-
         try {
-            $exitCode = $this->processMessage($message);
+            $process = new Process($this->getProcessCommand($message));
+            $process->start();
+
+            do {
+                $this->subscriptionFacade->modifyAckDeadline(
+                    $this->subscriptionName,
+                    $message,
+                    static::ACK_DEADLINE
+                );
+
+                sleep(round(static::ACK_DEADLINE/2));
+            } while ($process->isRunning());
+
+            $this->logger->info($process->getOutput());
+
+            $exitCode = $process->isSuccessful() ? self::SUCCESS : self::FAILURE;
         } catch (Exception $e) {
             $this->onLoopException($e, $message);
 
@@ -217,5 +227,5 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         return (time() - $this->start) >= $this->getOption(self::OPTION_TIMEOUT);
     }
 
-    abstract protected function processMessage(Message $message): int;
+    abstract protected function getProcessCommand(Message $message): array;
 }
