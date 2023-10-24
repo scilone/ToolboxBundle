@@ -75,6 +75,6 @@ class TopicFacade
     {
         $topic = $this->getTopic($topicName);
 
-        $topic->publish($messages, $options + $this->publishOptions);
+        $topic->publishBatch($messages, $options + $this->publishOptions);
     }
 }
