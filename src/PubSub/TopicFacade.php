@@ -6,7 +6,6 @@ use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Subscription;
 use Google\Cloud\PubSub\Topic;
-use SciloneToolboxBundle\PubSub\Exception\UnknownTopicException;
 
 class TopicFacade
 {
@@ -19,9 +18,6 @@ class TopicFacade
     {
     }
 
-    /**
-     * @throws UnknownTopicException
-     */
     public function getTopic(string $name): Topic
     {
         if (
@@ -30,19 +26,12 @@ class TopicFacade
         ) {
             $topic = $this->pubSub->topic($name);
 
-            if ($topic->exists() !== true) {
-                throw new UnknownTopicException();
-            }
-
             $this->topics[$name] = $topic;
         }
 
         return $this->topics[$name];
     }
 
-    /**
-     * @throws UnknownTopicException
-     */
     public function publishMessage(string $topicName, Message $message, array $options = []): void
     {
         $topic = $this->getTopic($topicName);
@@ -50,9 +39,6 @@ class TopicFacade
         $topic->publish($message, $options + $this->publishOptions);
     }
 
-    /**
-     * @throws UnknownTopicException
-     */
     public function publish(string $topicName, array $data, array $attributes = [], array $options = []): void
     {
         $topic = $this->getTopic($topicName);
@@ -68,8 +54,6 @@ class TopicFacade
 
     /**
      * @param Message[] $messages
-     *
-     * @throws UnknownTopicException
      */
     public function publishMessageBatch(string $topicName, array $messages, array $options = []): void
     {
