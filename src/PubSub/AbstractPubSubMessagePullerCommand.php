@@ -25,7 +25,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         SIGTERM
     ];
     protected const DEFAULT_WORKER_TIMEOUT = 900;
-    protected const ACK_DEADLINE = 600;
+    protected const ACK_DEADLINE = 10;
     protected const TIME_TO_WAIT_BETWEEN_EMPTY_MESSAGE = 5;
 
     private const OPTION_TIMEOUT = 'timeout';
