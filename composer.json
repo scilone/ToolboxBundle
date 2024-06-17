@@ -44,11 +44,6 @@
             "SciloneToolboxBundle\\Tests\\": "tests/"
         }
     },
-    "replace": {
-        "symfony/polyfill-ctype": "*",
-        "symfony/polyfill-iconv": "*",
-        "symfony/polyfill-php72": "*"
-    },
     "scripts": {
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
