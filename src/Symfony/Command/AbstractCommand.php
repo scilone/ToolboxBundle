@@ -43,45 +43,10 @@ abstract class AbstractCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->logger->info(
-            'Start script : {command}',
-            [
-                'command'   => $this->getName(),
-                'arguments' => $input->getArguments(),
-                'options'   => $input->getOptions(),
-            ]
-        );
-
+        $this->onStart();
         $exitCode = $this->doExecute();
         $this->finally($exitCode);
-        $durationScript = time() - $this->start;
-
-        $this->logger->info(
-            'Script {command} ended in ' . $this->convertSecondsToHumanReadableTime($durationScript) .
-            ' with peak memory usage to ' . $this->convertToHumanReadableSize(memory_get_peak_usage(true)),
-            ['command' => $this->getName()]
-        );
-
-        $percentMemoryUsed = round(memory_get_peak_usage(true)*100/$this->getMemoryLimit());
-        if ($percentMemoryUsed > static::MEMORY_USAGE_WARNING) {
-            $this->logger->warning(
-                'Script use more than ' . static::MEMORY_USAGE_WARNING . '% of memory allowed',
-                [
-                    'command'             => $this->getName(),
-                    'percent_memory_used' => $percentMemoryUsed,
-                ]
-            );
-        }
-
-        if ($exitCode !== self::SUCCESS) {
-            $this->logger->error(
-                'Script exit with an error code',
-                [
-                    'command'   => $this->getName(),
-                    'exit_code' => $exitCode,
-                ]
-            );
-        }
+        $this->onEnd();
 
         return $exitCode;
     }
@@ -178,6 +143,49 @@ abstract class AbstractCommand extends Command
     protected function finally(int $exitCode): void
     {
         //do something
+    }
+
+    protected function onStart(): void
+    {
+        $this->logger->info(
+            'Start script : {command}',
+            [
+                'command'   => $this->getName(),
+                'arguments' => $this->input->getArguments(),
+                'options'   => $this->input->getOptions(),
+            ]
+        );
+    }
+
+    protected function onEnd(): void
+    {
+        $durationScript = time() - $this->start;
+        $this->logger->info(
+            'Script {command} ended in ' . $this->convertSecondsToHumanReadableTime($durationScript) .
+            ' with peak memory usage to ' . $this->convertToHumanReadableSize(memory_get_peak_usage(true)),
+            ['command' => $this->getName()]
+        );
+
+        $percentMemoryUsed = round(memory_get_peak_usage(true)*100/$this->getMemoryLimit());
+        if ($percentMemoryUsed > static::MEMORY_USAGE_WARNING) {
+            $this->logger->warning(
+                'Script {command} use more than ' . static::MEMORY_USAGE_WARNING . '% of memory allowed',
+                [
+                    'command'             => $this->getName(),
+                    'percent_memory_used' => $percentMemoryUsed,
+                ]
+            );
+        }
+
+        if ($exitCode !== self::SUCCESS) {
+            $this->logger->error(
+                'Script exit with an error code',
+                [
+                    'command'   => $this->getName(),
+                    'exit_code' => $exitCode,
+                ]
+            );
+        }
     }
 
     abstract protected function doExecute(): int;

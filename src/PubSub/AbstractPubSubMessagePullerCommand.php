@@ -5,6 +5,7 @@ namespace SciloneToolboxBundle\PubSub;
 use Exception;
 use Google\Cloud\PubSub\Message;
 use Psr\Log\LoggerInterface;
+use SciloneToolboxBundle\Logger\LoggerFactory;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -37,6 +38,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
     public function __construct(
         protected readonly SubscriptionFacade $subscriptionFacade,
         protected readonly string $subscriptionName,
+        protected readonly LoggerFactory $loggerFactory,
         LoggerInterface $logger
     ) {
         parent::__construct($logger);
@@ -99,13 +101,11 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
                 sleep(round(static::ACK_DEADLINE/2));
             } while ($process->isRunning());
 
-            $this->logger->info($process->getOutput());
+            $this->postProcess($process);
 
             $exitCode = $process->isSuccessful() ? self::SUCCESS : self::FAILURE;
         } catch (Exception $e) {
             $this->onLoopException($e, $message);
-
-            return self::FAILURE;
         }
 
         if ($exitCode === self::SUCCESS) {
@@ -139,8 +139,27 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         }
 
         $this->finally($exitCode);
+        $this->onEnd();
 
         return self::SUCCESS;
+    }
+
+    protected function postProcess(Process $process): void
+    {
+        $output = $process->getOutput();
+        $logLines = explode("\n", $output);
+        foreach ($logLines as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+
+            $log = $this->loggerFactory->createFromString($line);
+            $this->logger->log(
+                $log->getLevel(),
+                $log->getMessage(),
+                $log->getContext() + ['extra' => $log->getExtra()]
+            );
+        }
     }
 
     protected function onStoppedByTimeout(): void
@@ -151,18 +170,6 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
     protected function onStoppedBySignal(): void
     {
         //do something
-    }
-
-    protected function onStart(): void
-    {
-        $this->logger->info(
-            'Start script : {command}',
-            [
-                'command'   => $this->getName(),
-                'arguments' => $this->input->getArguments(),
-                'options'   => $this->input->getOptions(),
-            ]
-        );
     }
 
     protected function onEnd(): void
