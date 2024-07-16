@@ -13,8 +13,8 @@ readonly class Log
         private string $message,
         private ?DateTimeImmutable $dateTime = null,
         private ?string $channel = null,
-        private ?array $context = null,
-        private ?array $extra = null,
+        private array $context = [],
+        private array $extra = [],
     ) {}
 
     public function getLevel(): string
@@ -37,12 +37,12 @@ readonly class Log
         return $this->channel;
     }
 
-    public function getContext(): ?array
+    public function getContext(): array
     {
         return $this->context;
     }
 
-    public function getExtra(): ?array
+    public function getExtra(): array
     {
         return $this->extra;
     }

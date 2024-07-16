@@ -87,6 +87,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
             return self::SUCCESS;
         }
 
+        $exitCode = self::FAILURE;
         try {
             $process = new Process($this->getProcessCommand($message));
             $process->start();
