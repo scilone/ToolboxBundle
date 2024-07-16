@@ -139,7 +139,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         }
 
         $this->finally($exitCode);
-        $this->onEnd();
+        $this->onEnd($exitCode);
 
         return self::SUCCESS;
     }
@@ -172,7 +172,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         //do something
     }
 
-    protected function onEnd(): void
+    protected function onEnd(int $exitCode): void
     {
         $this->logger->info(
             'Puller ended ended with peak memory usage to ' .

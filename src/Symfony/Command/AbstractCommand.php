@@ -46,7 +46,7 @@ abstract class AbstractCommand extends Command
         $this->onStart();
         $exitCode = $this->doExecute();
         $this->finally($exitCode);
-        $this->onEnd();
+        $this->onEnd($exitCode);
 
         return $exitCode;
     }
@@ -157,7 +157,7 @@ abstract class AbstractCommand extends Command
         );
     }
 
-    protected function onEnd(): void
+    protected function onEnd(int $exitCode): void
     {
         $durationScript = time() - $this->start;
         $this->logger->info(
