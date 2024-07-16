@@ -158,7 +158,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
             $this->logger->log(
                 $log->getLevel(),
                 $log->getMessage(),
-                $log->getContext() + ['extra' => $log->getExtra()]
+                ($log->getContext() ?? []) + ($log->getExtra() ?? [])
             );
         }
     }
