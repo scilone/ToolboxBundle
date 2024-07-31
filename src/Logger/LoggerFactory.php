@@ -5,11 +5,33 @@ declare(strict_types=1);
 namespace SciloneToolboxBundle\Logger;
 
 use DateTimeImmutable;
+use JsonException;
 
 class LoggerFactory
 {
     public function createFromString(string $log, bool $allowEval = false): Log
     {
+        try {
+            $logJsonDecoded = json_decode($log, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            $logJsonDecoded = null;
+        }
+        if (is_array($logJsonDecoded)) {
+            $datetime = null;
+            if (!empty($logJsonDecoded['datetime'] ?? '')) {
+                $datetime = new DateTimeImmutable($logJsonDecoded['datetime']);
+            }
+
+            return new Log(
+                $logJsonDecoded['severity'] ?? 'DEBUG',
+                $logJsonDecoded['message'] ?? '',
+                $datetime,
+                $logJsonDecoded['channel'] ?? null,
+                $logJsonDecoded['context'] ?? [],
+                $logJsonDecoded['extra'] ?? [],
+            );
+        }
+
         $matches = $this->normalize($log);
 
         $datetime = null;

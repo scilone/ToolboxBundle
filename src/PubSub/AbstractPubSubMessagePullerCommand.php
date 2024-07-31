@@ -147,7 +147,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
 
     protected function postProcess(Process $process): void
     {
-        $output = $process->getOutput();
+        $output = $this->getProcessLogs($process);
         $logLines = explode("\n", $output);
         foreach ($logLines as $line) {
             if (trim($line) === '') {
@@ -161,6 +161,11 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
                 ($log->getContext() ?? []) + ($log->getExtra() ?? [])
             );
         }
+    }
+
+    protected function getProcessLogs(Process $process): string
+    {
+        return $process->getOutput();
     }
 
     protected function onStoppedByTimeout(): void
