@@ -78,7 +78,7 @@ class LoggerFactory
         }
 
         preg_match(
-            '/^(?<datetime>.*?) (?<level>\w+) *\[(?<channel>.*?)\] (?<message>.*?)\s*(?<context>\[.*?\])\s*(?<extra>\[.*?\])?$/',
+            '/^(?<datetime>.*?) (?<level>\w+) *\[(?<channel>.*?)\] (?<message>.*?)(?:\s*(?<context>\[.*?\]))?(?:\s*(?<extra>\[.*?\]))?$/',
             $log,
             $matches
         );
