@@ -170,18 +170,18 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
 
     protected function onStoppedByTimeout(): void
     {
-        //do something
+        $this->logger->info('Puller stopped by timeout', ['timeout' => $this->workerTimeout]);
     }
 
     protected function onStoppedBySignal(): void
     {
-        //do something
+        $this->logger->info('Puller stopped by signal ');
     }
 
     protected function onEnd(int $exitCode): void
     {
         $this->logger->info(
-            'Puller ended ended with peak memory usage to ' .
+            'Puller ended with peak memory usage to ' .
             $this->convertToHumanReadableSize(memory_get_peak_usage(true)),
             ['command' => $this->getName()]
         );
