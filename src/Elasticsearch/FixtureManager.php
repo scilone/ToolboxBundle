@@ -3,28 +3,22 @@
 namespace SciloneToolboxBundle\Elasticsearch;
 
 use Elasticsearch\Client;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Filesystem\Filesystem;
 
-class FixtureManager
+readonly class FixtureManager
 {
-    private Client $client;
-    private string $fixturesPath;
-
-    public function __construct(Client $client, string $fixturesPath)
-    {
-        $this->client = $client;
-        $this->fixturesPath = $fixturesPath;
-    }
+    public function __construct(private Client $client, private string $fixturesPath) {}
 
     public function loadFixtures(): void
     {
         $filesystem = new Filesystem();
-        if (!$filesystem->exists($this->fixturesPath)) {
-            throw new \RuntimeException("Fixtures path does not exist: {$this->fixturesPath}");
+        if ($filesystem->exists($this->fixturesPath) === false) {
+            throw new RuntimeException("Fixtures path does not exist: {$this->fixturesPath}");
         }
 
-        $fixtureFiles = glob($this->fixturesPath . '/*.{yaml,yml}', GLOB_BRACE);
+        $fixtureFiles = glob("{$this->fixturesPath}/*.{yaml,yml}", GLOB_BRACE);
         foreach ($fixtureFiles as $file) {
             $data = Yaml::parseFile($file);
             $indexName = pathinfo($file, PATHINFO_FILENAME);
