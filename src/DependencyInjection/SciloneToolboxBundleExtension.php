@@ -14,10 +14,14 @@ class SciloneToolboxBundleExtension extends Extension
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yaml');
 
-        // Configure FixtureManager service if Elasticsearch client is available and FixtureManager not already defined
-        if ($container->hasDefinition('Elasticsearch\Client') && !$container->hasDefinition('SciloneToolboxBundle\Elasticsearch\FixtureManager')) {
+        if (
+            $container->hasDefinition('Elasticsearch\Client')
+            && $container->hasDefinition('Psr\Log\LoggerInterface')
+            && !$container->hasDefinition('SciloneToolboxBundle\Elasticsearch\FixtureManager')
+        ) {
             $container->register('SciloneToolboxBundle\Elasticsearch\FixtureManager', 'SciloneToolboxBundle\Elasticsearch\FixtureManager')
                 ->addArgument($container->getDefinition('Elasticsearch\Client'))
+                ->addArgument($container->getDefinition('Psr\Log\LoggerInterface'))
                 ->addArgument('%kernel.project_dir%/elasticsearch-fixtures');
         }
     }

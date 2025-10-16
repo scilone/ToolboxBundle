@@ -3,13 +3,20 @@
 namespace SciloneToolboxBundle\Elasticsearch;
 
 use Elasticsearch\Client;
+use Exception;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Filesystem\Filesystem;
 
 readonly class FixtureManager
 {
-    public function __construct(private Client $client, private string $fixturesPath) {}
+    public function __construct(
+        private Client $client,
+        private LoggerInterface $logger,
+        private string $fixturesPath
+    ) {}
 
     public function loadFixtures(): void
     {
@@ -42,7 +49,11 @@ readonly class FixtureManager
             ]
         ];
 
-        $this->client->indices()->create($params);
+        try {
+            $this->client->indices()->create($params);
+        } catch (Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
     }
 
     private function insertData(string $indexName, array $data): void
@@ -56,7 +67,9 @@ readonly class FixtureManager
                     '_id' => $document['_id'] ?? null
                 ]
             ];
-            $params['body'][] = $document;
+            $doc = $document;
+            unset($doc['_id']);
+            $params['body'][] = $doc;
         }
 
         if (!empty($params['body'])) {
