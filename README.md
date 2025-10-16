@@ -8,6 +8,14 @@ Ce bundle fournit une fonctionnalité pour charger des fixtures dans Elasticsear
 
 Ajoutez le bundle à votre application Symfony et configurez le client Elasticsearch.
 
+Si l'autowiring du `FixtureManager` échoue, ajoutez cette configuration dans votre `services.yaml` :
+
+```yaml
+SciloneToolboxBundle\Elasticsearch\FixtureManager:
+    arguments:
+        $fixturesPath: '%kernel.project_dir%/elasticsearch-fixtures'
+```
+
 ### Utilisation
 
 1. Créez des fichiers YAML (`.yaml` ou `.yml`) dans le dossier `elasticsearch-fixtures/` de votre projet (pas dans le bundle).

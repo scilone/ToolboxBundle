@@ -24,10 +24,10 @@ services:
     Elasticsearch\Client:
         # Configure your Elasticsearch client here, e.g., with hosts, etc.
 
-    # FixtureManager service
-    SciloneToolboxBundle\Elasticsearch\FixtureManager:
-        arguments:
-            $fixturesPath: '%kernel.project_dir%/elasticsearch-fixtures'
+    # FixtureManager service - configure in your main project if autowiring fails
+    # SciloneToolboxBundle\Elasticsearch\FixtureManager:
+    #     arguments:
+    #         $fixturesPath: '%kernel.project_dir%/elasticsearch-fixtures'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
