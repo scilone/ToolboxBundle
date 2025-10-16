@@ -4,7 +4,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    scilone_toolbox_bundle.fixtures_path: '%kernel.project_dir%/elasticsearch-fixtures'
 
 services:
     # default configuration for services in *this* file
@@ -25,10 +24,8 @@ services:
     Elasticsearch\Client:
         # Configure your Elasticsearch client here, e.g., with hosts, etc.
 
-    # FixtureManager service
-    SciloneToolboxBundle\Elasticsearch\FixtureManager:
-        arguments:
-            $fixturesPath: '%scilone_toolbox_bundle.fixtures_path%'
+    # FixtureManager service (autowired with default fixtures path)
+    # SciloneToolboxBundle\Elasticsearch\FixtureManager: ~
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
