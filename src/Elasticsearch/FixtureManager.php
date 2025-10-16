@@ -11,7 +11,7 @@ class FixtureManager
     private Client $client;
     private string $fixturesPath;
 
-    public function __construct(Client $client, string $fixturesPath = '%kernel.project_dir%/elasticsearch-fixtures')
+    public function __construct(Client $client, string $fixturesPath)
     {
         $this->client = $client;
         $this->fixturesPath = $fixturesPath;
