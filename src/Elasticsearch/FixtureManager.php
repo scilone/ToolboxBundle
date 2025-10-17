@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Filesystem\Filesystem;
+use Throwable;
 
 readonly class FixtureManager
 {
@@ -18,7 +19,7 @@ readonly class FixtureManager
         private string $fixturesPath
     ) {}
 
-    public function loadFixtures(): void
+    public function loadFixtures(bool $force = false): void
     {
         $filesystem = new Filesystem();
         if ($filesystem->exists($this->fixturesPath) === false) {
@@ -28,10 +29,15 @@ readonly class FixtureManager
         $fixtureFiles = glob("{$this->fixturesPath}/*.{yaml,yml}", GLOB_BRACE);
         foreach ($fixtureFiles as $file) {
             $data = Yaml::parseFile($file);
+            $data = $this->processData($data);
             $indexName = pathinfo($file, PATHINFO_FILENAME);
 
             if (isset($data['mapping'])) {
-                $this->createIndex($indexName, $data['mapping']);
+                if ($force) {
+                    $this->deleteIndex($indexName);
+                }
+
+                $this->createIndex($indexName, $data['mapping'], $force);
             }
 
             if (isset($data['data'])) {
@@ -52,7 +58,20 @@ readonly class FixtureManager
         try {
             $this->client->indices()->create($params);
         } catch (Exception $e) {
-            $this->logger->warning($e->getMessage());
+            $this->logger->error("Failed to create index {$indexName}: " . $e->getMessage());
+        }
+    }
+
+    private function deleteIndex(string $indexName): void
+    {
+        $params = [
+            'index' => $indexName
+        ];
+
+        try {
+            $this->client->indices()->delete($params);
+        } catch (Exception $e) {
+            $this->logger->error("Failed to delete index {$indexName}: " . $e->getMessage());
         }
     }
 
@@ -75,5 +94,34 @@ readonly class FixtureManager
         if (!empty($params['body'])) {
             $this->client->bulk($params);
         }
+    }
+
+    private function processData(array $data): array
+    {
+        array_walk_recursive($data, function (&$value) {
+            if (is_string($value)) {
+                $value = $this->processValue($value);
+            }
+        });
+
+        return $data;
+    }
+
+    private function processValue(string $value): mixed
+    {
+        if (preg_match('/^<\((.*)\)>$/', $value, $matches)) {
+            try {
+                return eval('return ' . $matches[1] . ';');
+            } catch (Throwable $e) {
+                $this->logger->error(
+                    'Failed to process PHP expression in fixture data',
+                    ['error' => $e->getMessage()]
+                );
+
+                return $value;
+            }
+        }
+
+        return $value;
     }
 }
