@@ -19,8 +19,14 @@ readonly class FixtureManager
         private string $fixturesPath
     ) {}
 
-    public function loadFixtures(bool $force = false): void
+    public function loadFixtures(bool $reset = false, bool $noSafety = false): void
     {
+        // Safety: allow only local hosts by default
+        if ($noSafety === false && $this->isLocalHost() === false) {
+            $this->logger->error('Loading fixtures is only allowed when Elasticsearch host is local.');
+            throw new RuntimeException('Loading fixtures is only allowed when Elasticsearch host is local.');
+        }
+
         $filesystem = new Filesystem();
         if ($filesystem->exists($this->fixturesPath) === false) {
             throw new RuntimeException("Fixtures path does not exist: {$this->fixturesPath}");
@@ -33,11 +39,11 @@ readonly class FixtureManager
             $indexName = pathinfo($file, PATHINFO_FILENAME);
 
             if (isset($data['mapping'])) {
-                if ($force) {
+                if ($reset) {
                     $this->deleteIndex($indexName);
                 }
 
-                $this->createIndex($indexName, $data['mapping'], $force);
+                $this->createIndex($indexName, $data['mapping']);
             }
 
             if (isset($data['data'])) {
@@ -58,8 +64,23 @@ readonly class FixtureManager
         try {
             $this->client->indices()->create($params);
         } catch (Exception $e) {
-            $this->logger->error("Failed to create index {$indexName}: " . $e->getMessage());
+            $this->logger->error('Failed to create index', ['index' => $indexName, 'error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Determine whether the Elasticsearch client is pointing to a local host.
+     * Local hosts: localhost, 127.0.0.1 and the literal "elasticsearch".
+     */
+    private function isLocalHost(): bool
+    {
+        $connection = $this->client->transport->getConnection() ?? null;
+        $host = null;
+        if ($connection && method_exists($connection, 'getHost')) {
+            $host = $connection->getHost();
+        }
+
+        return in_array($host, ['localhost', '127.0.0.1', 'elasticsearch'], true);
     }
 
     private function deleteIndex(string $indexName): void
@@ -71,7 +92,7 @@ readonly class FixtureManager
         try {
             $this->client->indices()->delete($params);
         } catch (Exception $e) {
-            $this->logger->error("Failed to delete index {$indexName}: " . $e->getMessage());
+            $this->logger->error('Failed to delete index', ['index' => $indexName, 'error' => $e->getMessage()]);
         }
     }
 
