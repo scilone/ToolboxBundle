@@ -25,7 +25,8 @@ class LoadFixturesCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('force', null, InputOption::VALUE_NONE, 'Force the loading of fixtures');
+            ->addOption('reset', null, InputOption::VALUE_NONE, 'Reset the loading of fixtures')
+            ->addOption('no-safety', null, InputOption::VALUE_NONE, 'Disable safety: allow loading fixtures on non-local Elasticsearch hosts');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -33,8 +34,14 @@ class LoadFixturesCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $force = $input->getOption('force');
-            $this->fixtureManager->loadFixtures($force);
+            $reset = (bool) $input->getOption('reset');
+            $noSafety = (bool) $input->getOption('no-safety');
+
+            if ($noSafety) {
+                $io->warning('Safety checks are disabled with --no-safety. Make sure you know what you are doing.');
+            }
+
+            $this->fixtureManager->loadFixtures($reset, $noSafety);
             $io->success('Fixtures loaded successfully.');
             return Command::SUCCESS;
         } catch (\Exception $e) {
