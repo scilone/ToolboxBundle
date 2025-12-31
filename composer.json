@@ -10,7 +10,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pcntl": "*",
-        "google/cloud-pubsub": "^1.45",
+        "google/cloud-pubsub": "^1.45 || ^2.0",
         "symfony/console": "^6.4",
         "symfony/dotenv": "^6.4",
         "symfony/flex": "^1.17|^2",
