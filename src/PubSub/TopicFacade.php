@@ -32,24 +32,33 @@ class TopicFacade
         return $this->topics[$name];
     }
 
-    public function publishMessage(string $topicName, Message $message, array $options = []): void
+    public function publishMessage(string $topicName, Message $message, array $options = [], ?string $orderingKey = null): void
     {
         $topic = $this->getTopic($topicName);
 
-        $topic->publish($message, $options + $this->publishOptions);
+        if ($orderingKey !== null) {
+            $messageArray = $message->toArray();
+            $messageArray['orderingKey'] = $orderingKey;
+            $topic->publish($messageArray, $options + $this->publishOptions);
+        } else {
+            $topic->publish($message, $options + $this->publishOptions);
+        }
     }
 
-    public function publish(string $topicName, array $data, array $attributes = [], array $options = []): void
+    public function publish(string $topicName, array $data, array $attributes = [], array $options = [], ?string $orderingKey = null): void
     {
         $topic = $this->getTopic($topicName);
 
-        $topic->publish(
-            [
-                'data' => json_encode($data),
-                'attributes' => ['Content-Type' => 'application/json'] + $attributes
-            ],
-            $options + $this->publishOptions
-        );
+        $message = [
+            'data' => json_encode($data),
+            'attributes' => ['Content-Type' => 'application/json'] + $attributes
+        ];
+
+        if ($orderingKey !== null) {
+            $message['orderingKey'] = $orderingKey;
+        }
+
+        $topic->publish($message, $options + $this->publishOptions);
     }
 
     /**
