@@ -15,9 +15,7 @@ class SubscriptionFacade
      */
     private array $subscriptions;
 
-    public function __construct(private PubSubClient $pubSub, private array $pullOptions = [])
-    {
-    }
+    public function __construct(private readonly PubSubClient $pubSub, private readonly array $pullOptions = []) {}
 
     public function getSubscription(string $name): Subscription
     {

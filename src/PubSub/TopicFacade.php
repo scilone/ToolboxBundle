@@ -3,6 +3,7 @@
 namespace SciloneToolboxBundle\PubSub;
 
 use Google\Cloud\PubSub\Message;
+use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Subscription;
 use Google\Cloud\PubSub\Topic;
@@ -14,9 +15,7 @@ class TopicFacade
      */
     private array $topics;
 
-    public function __construct(private PubSubClient $pubSub, private array $publishOptions = [])
-    {
-    }
+    public function __construct(private readonly PubSubClient $pubSub, private readonly array $publishOptions = []) {}
 
     public function getTopic(string $name): Topic
     {
@@ -32,22 +31,45 @@ class TopicFacade
         return $this->topics[$name];
     }
 
-    public function publishMessage(string $topicName, Message $message, array $options = []): void
-    {
+    public function publishMessage(
+        string $topicName,
+        Message $message,
+        array $options = [],
+        ?string $orderingKey = null
+    ): void {
         $topic = $this->getTopic($topicName);
+
+        if ($orderingKey !== null) {
+            $message = (new MessageBuilder($message->toArray()))
+                ->setOrderingKey($orderingKey)
+                ->build();
+
+            $options['enableMessageOrdering'] = true;
+        }
 
         $topic->publish($message, $options + $this->publishOptions);
     }
 
-    public function publish(string $topicName, array $data, array $attributes = [], array $options = []): void
-    {
+    public function publish(
+        string $topicName,
+        array $data,
+        array $attributes = [],
+        array $options = [],
+        ?string $orderingKey = null
+    ): void {
         $topic = $this->getTopic($topicName);
 
+        $messageBuilder = (new MessageBuilder())
+            ->setData(json_encode($data))
+            ->setAttributes(['Content-Type' => 'application/json'] + $attributes);
+
+        if ($orderingKey !== null) {
+            $messageBuilder->setOrderingKey($orderingKey);
+            $options['enableMessageOrdering'] = true;
+        }
+
         $topic->publish(
-            [
-                'data' => json_encode($data),
-                'attributes' => ['Content-Type' => 'application/json'] + $attributes
-            ],
+            $messageBuilder->build(),
             $options + $this->publishOptions
         );
     }
