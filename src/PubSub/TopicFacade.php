@@ -34,18 +34,9 @@ class TopicFacade
     public function publishMessage(
         string $topicName,
         Message $message,
-        array $options = [],
-        ?string $orderingKey = null
+        array $options = []
     ): void {
         $topic = $this->getTopic($topicName);
-
-        if ($orderingKey !== null) {
-            $message = (new MessageBuilder($message->toArray()))
-                ->setOrderingKey($orderingKey)
-                ->build();
-
-            $options['enableMessageOrdering'] = true;
-        }
 
         $topic->publish($message, $options + $this->publishOptions);
     }
@@ -59,19 +50,32 @@ class TopicFacade
     ): void {
         $topic = $this->getTopic($topicName);
 
+        $message = $this->buildMessage($data, $attributes, $orderingKey);
+
+        if ($orderingKey !== null) {
+            $options['enableMessageOrdering'] = true;
+        }
+
+        $topic->publish(
+            $message,
+            $options + $this->publishOptions
+        );
+    }
+
+    public function buildMessage(
+        array $data,
+        array $attributes = [],
+        ?string $orderingKey = null
+    ): Message {
         $messageBuilder = (new MessageBuilder())
             ->setData(json_encode($data))
             ->setAttributes(['Content-Type' => 'application/json'] + $attributes);
 
         if ($orderingKey !== null) {
             $messageBuilder->setOrderingKey($orderingKey);
-            $options['enableMessageOrdering'] = true;
         }
 
-        $topic->publish(
-            $messageBuilder->build(),
-            $options + $this->publishOptions
-        );
+        return $messageBuilder->build();
     }
 
     /**
