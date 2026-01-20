@@ -56,7 +56,7 @@ class LoggerFactory
         }
 
         return new Log(
-            $matches['level'] ?? '',
+            $matches['level'] ?? 'DEBUG',
             $matches['message'] ?? '',
             $datetime,
             $matches['channel'] ?? null,
