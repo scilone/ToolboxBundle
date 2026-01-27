@@ -63,9 +63,16 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         return static::SUBSCRIBED_SIGNALS;
     }
 
-    public function handleSignal(int $signal): void
+    public function handleSignal(int $signal): int|false
     {
         $this->interruptConsumption = true;
+
+        if (!in_array($signal, $this->getSubscribedSignals(), true)) {
+            $this->logger->info('Worker stopped by signal: {signal}', ['signal' => $signal]);
+            return false;
+        }
+
+        return 0;
     }
 
     protected function shouldBeStopped(): bool
