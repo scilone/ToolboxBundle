@@ -63,7 +63,7 @@ abstract class AbstractPubSubMessagePullerCommand extends AbstractCommand implem
         return static::SUBSCRIBED_SIGNALS;
     }
 
-    public function handleSignal(int $signal): int|false
+    public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false
     {
         $this->interruptConsumption = true;
 
