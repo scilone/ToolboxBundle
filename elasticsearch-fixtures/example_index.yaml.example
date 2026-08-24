@@ -12,6 +12,10 @@ mapping:
     created_at:
       type: date
 
+settings:
+  number_of_shards: 1
+  number_of_replicas: 0
+
 data:
   - _id: "1"
     id: "user1"
