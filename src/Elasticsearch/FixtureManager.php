@@ -13,6 +13,11 @@ use Throwable;
 
 readonly class FixtureManager
 {
+    private const DEFAULT_INDEX_SETTINGS = [
+        'number_of_shards' => 1,
+        'number_of_replicas' => 0,
+    ];
+
     public function __construct(
         private Client $client,
         private LoggerInterface $logger,
@@ -38,12 +43,12 @@ readonly class FixtureManager
             $data = $this->processData($data);
             $indexName = pathinfo($file, PATHINFO_FILENAME);
 
-            if (isset($data['mapping'])) {
+            if (isset($data['mapping']) || isset($data['settings'])) {
                 if ($reset) {
                     $this->deleteIndex($indexName);
                 }
 
-                $this->createIndex($indexName, $data['mapping']);
+                $this->createIndex($indexName, $data);
             }
 
             if (isset($data['data'])) {
@@ -52,14 +57,15 @@ readonly class FixtureManager
         }
     }
 
-    private function createIndex(string $indexName, array $mapping): void
+    private function createIndex(string $indexName, array $data): void
     {
         $params = [
             'index' => $indexName,
-            'body' => [
-                'mappings' => $mapping
-            ]
+            'body' => []
         ];
+
+        $params['body']['mappings'] = $data['mapping'] ?? [];
+        $params['body']['settings'] = $data['settings'] ?? self::DEFAULT_INDEX_SETTINGS;
 
         try {
             $this->client->indices()->create($params);
