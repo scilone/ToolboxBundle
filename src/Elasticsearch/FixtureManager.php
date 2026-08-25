@@ -64,7 +64,7 @@ readonly class FixtureManager
             'body' => []
         ];
 
-        $params['body']['mappings'] = $data['mapping'] ?? null;
+        $params['body']['mappings'] = $data['mapping'] ?? [];
         $params['body']['settings'] = $data['settings'] ?? self::DEFAULT_INDEX_SETTINGS;
 
         try {
